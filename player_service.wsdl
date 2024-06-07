@@ -1,0 +1,185 @@
+<definitions name="PlayerService"
+            targetNamespace = "http://www.examples.com/wsdl/player_service.wsdl"
+            xmlns = "http://schemas.xmlsoap.org/wsdl/"
+            xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+            xmlns:tns = "http://www.examples.com/wsdl/player_service.wsdl"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:iops="http://www.examples.com/wsdl/xsd"
+            >
+
+    <!-- Define data types used in messages -->
+    <types>
+        <schema 
+            targetNamespace = "http://www.examples.com/wsdl/player_service.wsdl"
+            xmlns="http://www.w3.org/2000/10/XMLSchema"
+        >
+
+            <!-- Read request with string param -->
+            <complexType name="Stats">
+                <sequence>
+                    <element name="name" type="xsd:string"/>
+                    <element name="experience" type="xsd:float"/>
+                    <element name="creation_date" type="xsd:dateTime"/>
+                </sequence>
+            </complexType>
+
+            <!-- NaturalDisaster data types -->
+            <complexType name="Effect">
+                <sequence>
+                    <element name="effect" type="xsd:string"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="Debuff">
+                <sequence>
+                    <element name="uuid" type="xsd:string"/>
+                    <element name="description"/>
+                    <element name="effects" type="tns:Effect" maxOccurs="unbounded"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="ArrayOfDebuffs">
+                <sequence>
+                    <element name="debuff" type="tns:Debuff" maxOccurs="unbounded"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="NaturalDisasterData">
+                <sequence>
+                    <element name="id" type="xsd:int"/>
+                    <element name="name" type="xsd:string"/>
+                    <element name="duration" type="xsd:float"/>
+                    <element name="timeoccurred" type="xsd:dateTime"/>
+                    <element name="disasterDebuffs" type="tns:ArrayOfDebuffs"/>
+                </sequence>
+            </complexType>
+
+            <!-- ID of the created naturaldisaster element-->
+            <element name="CreateNaturalDisasterResponseData">
+                <complexType>
+                    <sequence>
+                        <element name="id" type="xsd:int"/>
+                    </sequence>
+                </complexType>
+            </element>
+
+            <complexType name="ArrayOfIds">
+                <sequence>
+                    <element name="id" type="xsd:int" maxOccurs="unbounded"/>
+                </sequence>
+            </complexType>
+
+        </schema>
+    </types>
+
+    <!-- Define messages -->
+
+    <!-- READ-->
+    <message name="GetPlayerStatsRequest">
+        <part name="id" type="xsd:int"/>
+        <part name="name" type="xsd:string"/>
+    </message>
+
+    <message name="GetPlayerStatsResponse">
+        <part name="stats" element="tns:Stats"/>
+    </message>
+
+    <!-- CREATE-->
+    <message name="CreateNaturalDisasterRequest">
+        <part name="playerId" type="xsd:int"/>
+        <part name="farmingBotId" type="xsd:int"/>
+        <part name="naturalDisasterData" element="tns:NaturalDisasterData"/>
+    </message>
+
+    <message name="CreateNaturalDisasterResponse">
+        <part name="createdNaturalDisasterId" element="tns:CreateNaturalDisasterResponseData"/>
+    </message>
+
+    <!-- UPDATE-->
+    <message name="UpdateNaturalDisasterRequest">
+        <part name="playerId" type="xsd:int"/>
+        <part name="farmingBotId" type="xsd:int"/>
+        <part name="naturalDisasterData" type="tns:NaturalDisasterData"/>
+    </message>
+
+    <message name="UpdateNaturalDisasterResponse">
+        <part name="updatedNaturalDisaster" type="tns:NaturalDisasterData"/>
+    </message>
+
+    <message name="DeleteNaturalDisastersFromDateRequest">
+        <part name="playerId" type="xsd:int"/>
+        <part name="farmingBotId" type="xsd:int"/>
+        <part name="deleteFromTimestamp" type="xsd:dateTime"/>
+    </message>
+
+    <message name="DeleteNaturalDisastersFromDateResponse">
+        <part name="deletedNaturalDisasterIds" type="tns:ArrayOfIds"/>
+    </message>
+
+    <!-- Define operations available -->
+    <portType name="PlayerStatsPortType">
+        <operation name="GetPlayerStats">
+            <input message="tns:GetPlayerStatsRequest"/>
+            <output message="tns:GetPlayerStatsResponse"/>
+        </operation>
+    </portType>
+
+    <portType name="NaturalDisasterPortType">
+        <operation name="CreateNaturalDisaster">
+            <input message="tns:CreateNaturalDisasterRequest"/>
+            <output message="tns:CreateNaturalDisasterResponse"/>
+        </operation>
+
+        <operation name="UpdateNaturalDisaster">
+            <input message="tns:UpdateNaturalDisasterRequest"/>
+            <output message="tns:UpdateNaturalDisasterResponse"/>
+        </operation>
+
+        <operation name="DeleteNaturalDisastersFromTimestamp">
+            <input message="tns:DeleteNaturalDisastersFromDateRequest"/>
+            <output message="tns:DeleteNaturalDisastersFromDateResponse"/>
+        </operation>
+    </portType>
+
+    <!-- Define how operations are bound to SOAP -->
+    <binding name="PlayerStatsBinding" type="tns:PlayerStatsPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetPlayerStats">
+            <soap:operation soapAction="tns:PlayerService#getPlayerStats"/>
+            <input><soap:body use="literal" /></input>
+            <output><soap:body use="literal" /></output>
+        </operation>
+    </binding>
+
+    <binding name="NaturalDisasterBinding" type="tns:NaturalDisasterPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="CreateNaturalDisaster">
+            <soap:operation soapAction="tns:PlayerService#createNaturalDisaster"/>
+            <input><soap:body use="literal" /></input>
+            <output><soap:body use="literal" /></output>
+        </operation>
+
+        <operation name="UpdateNaturalDisaster">
+            <soap:operation soapAction="tns:PlayerService#updateNaturalDisaster"/>
+            <input><soap:body use="literal" /></input>
+            <output><soap:body use="literal" /></output>
+        </operation>
+
+        <operation name="DeleteNaturalDisastersFromTimestamp">
+            <soap:operation soapAction="tns:PlayerService#deleteNaturalDisastersFromTimestamp"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+    <!-- Define the service and it's endpoint -->
+    <service name='PlayerService'>
+        <port name="PlayerStatsPort" binding="tns:PlayerStatsBinding">
+            <soap:address location="https://wwwlab.cs.univie.ac.at/~kiviniemip35/player_service.php"/>
+        </port>
+        <port name="NaturalDisasterPort" binding="tns:NaturalDisasterBinding">
+            <soap:address location="https://wwwlab.cs.univie.ac.at/~kiviniemip35/player_service.php"/>
+        </port>
+    </service>
+
+</definitions>
